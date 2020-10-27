@@ -1,0 +1,18 @@
+---
+seed: 3
+c_stages:
+    get_data: True
+c_data:
+    prefix: data
+    start_date: "2018_10_12"
+    end_date: "2018_10_15"
+    num_entities_per_article: 4
+    database: "temp_graph.db"
+    salience_threshold: 0.02
+    limit: 1
+c_model:
+    prefix: models
+c_results:
+    prefix: experiments
+c_analyze:
+    figures: reports/figures
