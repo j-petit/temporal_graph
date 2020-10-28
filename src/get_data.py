@@ -63,6 +63,16 @@ def get_dataset(config):
                      out_files, [config["c_data"]["num_entities_per_article"]]*len(out_files),
                      [config["c_data"]["salience_threshold"]]*len(out_files)))
 
+    try:
+        conn = sqlite3.connect(config["c_data"]["database"])
+        cursor = conn.cursor()
+        cursor.execute("""CREATE TABLE IF NOT EXISTS "data" ("index" INTEGER, "entity_1" TEXT, "entity_2" TEXT)""")
+    except sqlite3.Error as error:
+        print(error)
+    finally:
+        if conn:
+            conn.close()
+
     with multiprocessing.Pool(config["cpu_count"]) as pool:
         for _ in tqdm(pool.istarmap(generate_graph_data, ins_2), total=len(ins_2)):
             pass
