@@ -1,0 +1,17 @@
+name: temp_graph
+channels:
+  - defaults
+  - conda-forge
+dependencies:
+  - pip
+  - python=3.8
+  - ipykernel
+  - pudb
+  - yaml
+  - pyyaml
+  - python-dotenv
+  - pandas
+  - numpy
+  - tqdm
+  - pymongo
+prefix: /home/jp/miniconda3/envs/temp_graph

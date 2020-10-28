@@ -9,7 +9,6 @@ from datetime import datetime
 import dotenv
 import multiprocessing
 import pandas as pd
-import pathpy
 
 from sacred import Experiment
 from sacred.observers import MongoObserver
@@ -65,6 +64,7 @@ def hook(config, command_name, logger):
     os.makedirs(config["c_results"]["output_path"], exist_ok=True)
     os.makedirs(config["c_data"]["processed"], exist_ok=True)
     os.makedirs(config["c_data"]["interim"], exist_ok=True)
+    os.makedirs(config["c_data"]["raw"], exist_ok=True)
 
     # logging.config.fileConfig("config/logging_local.conf")
     log_config = yaml.load(open("config/logging.yaml", "r"), yaml.SafeLoader)
