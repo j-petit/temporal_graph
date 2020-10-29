@@ -5,7 +5,7 @@ import yaml
 import sacred
 import pprint
 import os
-from datetime import datetime
+import datetime
 import dotenv
 import multiprocessing
 import pandas as pd
@@ -14,6 +14,7 @@ from sacred import Experiment
 from sacred.observers import MongoObserver
 
 from src.get_data import get_dataset
+from src.data_loader import occurances_entity
 
 
 ex = sacred.Experiment("temp_graph")
@@ -41,14 +42,14 @@ def config(c_data, c_results, c_model):
     c_data["processed"] = os.path.join(c_data["prefix"], "processed")
     c_data["interim"] = os.path.join(c_data["prefix"], "interim")
 
-    timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+    timestamp = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
 
     cpu_count = multiprocessing.cpu_count()
 
     c_results["output_path"] = os.path.join(c_results["prefix"], timestamp)
 
-    c_data["start_date"] = datetime.strptime(c_data["start_date"], "%Y_%m_%d")
-    c_data["end_date"] = datetime.strptime(c_data["end_date"], "%Y_%m_%d")
+    c_data["start_date"] = datetime.datetime.strptime(c_data["start_date"], "%Y_%m_%d")
+    c_data["end_date"] = datetime.datetime.strptime(c_data["end_date"], "%Y_%m_%d")
     c_data["database"] = os.path.join(c_data["interim"], c_data["database"])
 
 
@@ -88,5 +89,8 @@ def run(hook, _config, c_stages, c_results, _run):
 
     if c_stages["get_data"]:
         get_dataset(_config)
+    if c_stages["test"]:
+        start = datetime.datetime(2018, 10, 13)
+        occurances_entity(start, "Donald Trump", _config)
 
     ex.add_artifact(os.path.join(c_results["output_path"], "general.log"))

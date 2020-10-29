@@ -15,7 +15,6 @@ from tqdm import tqdm
 import src.istarmap
 
 
-
 def get_dataset(config):
     """Downloads the corresponding data and preprocesses it"""
 
@@ -49,9 +48,9 @@ def get_dataset(config):
     out_files = selection["out_file"].tolist()
 
     if config["c_data"]["limit"]:
-        urls = urls[:config["c_data"]["limit"]]
-        in_files = in_files[:config["c_data"]["limit"]]
-        out_files = out_files[:config["c_data"]["limit"]]
+        urls = urls[: config["c_data"]["limit"]]
+        in_files = in_files[: config["c_data"]["limit"]]
+        out_files = out_files[: config["c_data"]["limit"]]
 
     ins = list(zip(urls, in_files, out_files))
 
@@ -59,14 +58,21 @@ def get_dataset(config):
         for _ in tqdm(pool.istarmap(preprocess_datafile, ins), total=len(ins)):
             pass
 
-    ins_2 = list(zip([config["c_data"]["database"]]*len(out_files),
-                     out_files, [config["c_data"]["num_entities_per_article"]]*len(out_files),
-                     [config["c_data"]["salience_threshold"]]*len(out_files)))
+    ins_2 = list(
+        zip(
+            [config["c_data"]["database"]] * len(out_files),
+            out_files,
+            [config["c_data"]["num_entities_per_article"]] * len(out_files),
+            [config["c_data"]["salience_threshold"]] * len(out_files),
+        )
+    )
 
     try:
         conn = sqlite3.connect(config["c_data"]["database"])
         cursor = conn.cursor()
-        cursor.execute("""CREATE TABLE IF NOT EXISTS "data" ("index" INTEGER, "entity_1" TEXT, "entity_2" TEXT)""")
+        cursor.execute(
+            """CREATE TABLE IF NOT EXISTS "data" ("unix_time" INTEGER, "entity_1" TEXT, "entity_2" TEXT)"""
+        )
     except sqlite3.Error as error:
         print(error)
     finally:
@@ -76,6 +82,16 @@ def get_dataset(config):
     with multiprocessing.Pool(config["cpu_count"]) as pool:
         for _ in tqdm(pool.istarmap(generate_graph_data, ins_2), total=len(ins_2)):
             pass
+
+    try:
+        conn = sqlite3.connect(config["c_data"]["database"])
+        cursor = conn.cursor()
+        cursor.execute("""CREATE INDEX IF NOT EXISTS "unix_time" ON "data" ("unix_time"	ASC)""")
+    except sqlite3.Error as error:
+        print(error)
+    finally:
+        if conn:
+            conn.close()
 
 
 def preprocess_datafile(url, in_file, out_file):
@@ -107,15 +123,16 @@ def generate_graph_data(db_name, processed_file, num_entities_per_article, salie
         article_pairs = list(itertools.combinations(entities, 2))
 
         article_date = datetime.datetime.strptime(article["date"], "%Y-%m-%dT%H:%M:%SZ")
-        time_index.extend([int(article_date.timestamp())] * len(article_pairs))
-
+        article_pairs = [
+            (int(article_date.timestamp()), *article_pair) for article_pair in article_pairs
+        ]
         pairs.extend(article_pairs)
 
-    df = pd.DataFrame(pairs, index=time_index, columns=['entity_1', 'entity_2'])
+    df = pd.DataFrame(pairs, columns=["unix_time", "entity_1", "entity_2"])
 
     try:
         conn = sqlite3.connect(db_name)
-        df.to_sql("data", conn, if_exists="append")
+        df.to_sql("data", conn, index=False, if_exists="append")
     except sqlite3.Error as e:
         print(e)
     finally:
