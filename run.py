@@ -56,6 +56,9 @@ def config(c_data, c_results, c_model):
 @ex.config_hook
 def hook(config, command_name, logger):
 
+    if config["c_data"]["cluster"]:
+        os.system(f"rm -rf {config['c_data']['prefix']}")
+
     config.update({"hook": True})
 
     pd.set_option("display.max_columns", 500)
@@ -80,6 +83,14 @@ def hook(config, command_name, logger):
 
     return config
 
+@ex.post_run_hook
+def test(c_data, _log):
+
+    logger = logging.getLogger("temp_graph." + os.path.basename(os.path.splitext(__file__)[0]))
+
+    if c_data["cluster"]:
+        os.system(f"cp {c_data['database']} ./data/interim/")
+        _log.info("Copying database back...")
 
 @ex.automain
 def run(hook, _config, c_stages, c_results, _run):

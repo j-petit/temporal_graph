@@ -132,7 +132,7 @@ def generate_graph_data(db_name, processed_file, num_entities_per_article, salie
 
     try:
         conn = sqlite3.connect(db_name)
-        df.to_sql("data", conn, index=False, if_exists="append")
+        df.to_sql("data", conn, index=False, if_exists="append", method='multi')
     except sqlite3.Error as e:
         print(e)
     finally:
