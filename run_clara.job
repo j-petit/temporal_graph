@@ -1,8 +1,8 @@
 #!/bin/bash
 
-#SBATCH --time=01:00:00
-#SBATCH --cpus-per-task=4
-#SBATCH --mem=32gb
+#SBATCH --time=12:00:00
+#SBATCH --cpus-per-task=12
+#SBATCH --mem=64gb
 #SBATCH --part=clara-job
 #SBATCH --ntasks=1
 
@@ -13,4 +13,4 @@ fi
 . "$HOME/miniconda3/etc/profile.d/conda.sh"
 conda activate temp_graph
 
-python run.py $SLURM_ARRAY_TASK_ID
+python run.py

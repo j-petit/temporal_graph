@@ -97,10 +97,7 @@ def get_dataset(config):
 def preprocess_datafile(url, in_file, out_file):
 
     if not os.path.isfile(in_file):
-        temp_file = os.path.basename(in_file)
-        os.system(f"curl -s -LOJ {url}")
-        os.system(f"gunzip {temp_file}.gz")
-        os.system(f"mv {temp_file} {in_file}")
+        os.system(f"curl -sLJ {url} | gunzip > {in_file}")
 
     if not os.path.isfile(out_file):
         os.system(f"./src/preprocess.sh {in_file} {out_file}")

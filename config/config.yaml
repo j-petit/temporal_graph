@@ -1,13 +1,13 @@
 ---
 seed: 3
 c_stages:
-    get_data: False
-    test: True
+    get_data: True
+    test: False
 c_data:
-    cluster: False
+    cluster: True
     prefix: /nvme/scratch/ja952kire/temp_graph/data
     start_date: "2018_01_01"
-    end_date: "2018_01_10"
+    end_date: "2019_01_01"
     num_entities_per_article: 4
     database: "temp_graph.db"
     salience_threshold: 0.02

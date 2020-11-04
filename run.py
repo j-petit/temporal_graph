@@ -83,14 +83,16 @@ def hook(config, command_name, logger):
 
     return config
 
-@ex.post_run_hook
-def test(c_data, _log):
 
-    logger = logging.getLogger("temp_graph." + os.path.basename(os.path.splitext(__file__)[0]))
+@ex.post_run_hook
+def clean_up(c_data, _log):
 
     if c_data["cluster"]:
-        os.system(f"cp {c_data['database']} ./data/interim/")
         _log.info("Copying database back...")
+        os.system(f"cp {c_data['database']} ./data/interim/")
+        _log.info("Removing temp files...")
+        os.system(f"rm -rf {c_data['prefix']}")
+
 
 @ex.automain
 def run(hook, _config, c_stages, c_results, _run):
