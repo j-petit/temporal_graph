@@ -1,0 +1,4 @@
+[core]
+    remote = cache
+['remote "cache"']
+    url = ssh://jp@139.18.13.64:888/home/dvccache
