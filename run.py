@@ -15,6 +15,7 @@ from sacred.observers import MongoObserver
 
 from src.get_data import get_dataset
 from src.data_loader import occurances_entity
+from src.utils import plot_occurances
 
 
 ex = sacred.Experiment("temp_graph")
@@ -103,7 +104,8 @@ def run(hook, _config, c_stages, c_results, _run):
     if c_stages["get_data"]:
         get_dataset(_config)
     if c_stages["test"]:
-        start = datetime.datetime(2018, 10, 13)
-        occurances_entity(start, "Donald Trump", _config)
+        start = datetime.datetime(2018, 7, 13)
+        occ = occurances_entity(start, "IPCC", _config)
+        plot_occurances(occ)
 
     ex.add_artifact(os.path.join(c_results["output_path"], "general.log"))

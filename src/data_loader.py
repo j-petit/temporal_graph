@@ -8,10 +8,6 @@ def occurances_entity(start_date, entity, config):
         start_date + datetime.timedelta(days=x) for x in range(config["c_model"]["predict_horizon"])
     ]
 
-    import pudb
-
-    pudb.set_trace()
-
     starts = [int(date.timestamp()) for date in date_list]
     ends = [start + 24 * 60 * 60 for start in starts]
 
@@ -37,4 +33,4 @@ def occurances_entity(start_date, entity, config):
         if conn:
             conn.close()
 
-    return occurances
+    return list(zip(occurances, date_list))

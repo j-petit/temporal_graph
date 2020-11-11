@@ -73,6 +73,9 @@ def get_dataset(config):
         cursor.execute(
             """CREATE TABLE IF NOT EXISTS "data" ("unix_time" INTEGER, "entity_1" TEXT, "entity_2" TEXT)"""
         )
+        cursor.execute(
+            """CREATE TABLE IF NOT EXISTS "entities" ("mid" TEXT UNIQUE, "name" TEXT, "type" TEXT, PRIMARY KEY("mid") ON CONFLICT IGNORE)"""
+        )
     except sqlite3.Error as error:
         print(error)
     finally:
@@ -86,12 +89,18 @@ def get_dataset(config):
     try:
         conn = sqlite3.connect(config["c_data"]["database"])
         cursor = conn.cursor()
-        cursor.execute("""CREATE INDEX IF NOT EXISTS "unix_time" ON "data" ("unix_time"	ASC)""")
+        cursor.execute("""CREATE INDEX IF NOT EXISTS "unix_time" ON "data" ("unix_time" ASC);""")
+        conn.commit()
     except sqlite3.Error as error:
         print(error)
     finally:
         if conn:
             conn.close()
+
+    log = logging.getLogger("preprocess")
+    log.info("Now creating entity counts...")
+    create_entity_counts(config["c_data"]["database"])
+    log.info("Finished generating entity counts...")
 
 
 def preprocess_datafile(url, in_file, out_file):
@@ -111,11 +120,17 @@ def generate_graph_data(db_name, processed_file, num_entities_per_article, salie
 
     time_index = []
 
+    entity_ids = pd.DataFrame(columns=["mid", "name", "type"])
+
     for article in data:
+        entity_names = []
         entities = []
+        entity_type = []
         for entity in article["entities"][:num_entities_per_article]:
             if entity["avgSalience"] > salience_threshold:
-                entities.append(entity["name"])
+                entities.append(entity["mid"])
+                entity_names.append(entity["name"])
+                entity_type.append(entity["type"])
 
         article_pairs = list(itertools.combinations(entities, 2))
 
@@ -124,12 +139,38 @@ def generate_graph_data(db_name, processed_file, num_entities_per_article, salie
             (int(article_date.timestamp()), *article_pair) for article_pair in article_pairs
         ]
         pairs.extend(article_pairs)
+        entity_ids = entity_ids.append(pd.DataFrame(list(zip(entities, entity_names, entity_type)), columns=["mid", "name", "type"]))
 
     df = pd.DataFrame(pairs, columns=["unix_time", "entity_1", "entity_2"])
 
     try:
         conn = sqlite3.connect(db_name)
         df.to_sql("data", conn, index=False, if_exists="append", method='multi')
+        entity_ids.to_sql("entities", conn, index=False, if_exists="append", method='multi')
+        conn.commit()
+    except sqlite3.Error as e:
+        print(e)
+    finally:
+        if conn:
+            conn.close()
+
+
+def create_entity_counts(db_name):
+    try:
+        conn = sqlite3.connect(db_name)
+        cursor = conn.cursor()
+        cursor.execute("""
+            CREATE TABLE entity_counts AS
+            SELECT entity_1, my_date, COUNT(*) as occCount FROM
+            (
+                SELECT entity_1, date(unix_time, "unixepoch") as my_date FROM data
+                UNION ALL
+                SELECT entity_2, date(unix_time, "unixepoch") as my_date FROM data
+            )
+            GROUP BY entity_1, my_date
+            ORDER BY my_date ASC, occCount DESC"""
+        )
+        conn.commit()
     except sqlite3.Error as e:
         print(e)
     finally:

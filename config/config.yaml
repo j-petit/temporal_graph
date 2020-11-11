@@ -4,8 +4,8 @@ c_stages:
     get_data: True
     test: False
 c_data:
-    cluster: True
-    prefix: /nvme/scratch/ja952kire/temp_graph/data
+    cluster: False
+    prefix: data/
     start_date: "2018_01_01"
     end_date: "2019_01_01"
     num_entities_per_article: 4
@@ -14,7 +14,7 @@ c_data:
     limit:
 c_model:
     prefix: models
-    predict_horizon: 100
+    predict_horizon: 200
 c_results:
     prefix: experiments
 c_analyze:
