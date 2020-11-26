@@ -1,8 +1,9 @@
 ---
 seed: 3
 c_stages:
-    get_data: True
+    get_data: False
     test: False
+    train: True
 c_data:
     cluster: False
     prefix: data/

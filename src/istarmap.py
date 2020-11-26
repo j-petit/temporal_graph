@@ -1,3 +1,9 @@
+"""
+File: istarmap.py
+Author: Jens Petit
+Description: Makes tqdm work with starmap
+"""
+
 import multiprocessing.pool as mpp
 
 

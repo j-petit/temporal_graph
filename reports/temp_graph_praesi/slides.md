@@ -34,7 +34,7 @@ Timed list of events, including node addition, deletion and edge addition and de
 
 ## Temporal Graph Networks (TGN)
 
-![General encoder-decoder framework](tgn_general.pdf){width=65%}
+![The city of Leipzig as a graph](tgn_general.pdf){width=65%}
 
 Current decoders:
 
@@ -225,6 +225,8 @@ Replace decoder with a RNN which predicts the future #Occurrences per day for a 
 ------------------------------------
 
 The neighborhood should be strong indicator for future behavior: If all my neighbors are getting popular, then it is very likely that I will too.
+
+Example: If a footballer is mentioned during an event like a world cup, it should be much more active.
 
 ::::
 

@@ -15,6 +15,7 @@ from sacred.observers import MongoObserver
 
 from src.get_data import get_dataset
 from src.data_loader import occurances_entity
+from src.run_training import run_training
 from src.utils import plot_occurances
 
 
@@ -104,8 +105,8 @@ def run(hook, _config, c_stages, c_results, _run):
     if c_stages["get_data"]:
         get_dataset(_config)
     if c_stages["test"]:
-        start = datetime.datetime(2018, 7, 13)
-        occ = occurances_entity(start, "IPCC", _config)
-        plot_occurances(occ)
+        print("test")
+    if c_stages["train"]:
+        run_training(_config)
 
     ex.add_artifact(os.path.join(c_results["output_path"], "general.log"))
