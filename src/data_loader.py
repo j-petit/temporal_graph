@@ -12,7 +12,7 @@ def occurances_entity(start_date, entity, database, predict_horizon):
     )
 
     try:
-        conn = sqlite3.connect(database)
+        conn = sqlite3.connect(database, uri=True)
         cursor = conn.cursor()
 
         cursor.execute(f"""
@@ -49,13 +49,14 @@ class NewsEntityDataset(Dataset):
             transform (callable, optional): Optional transform to be applied
                 on a sample.
         """
-        self.database = database
+        self.database = f"file:{database}?mode=ro&cache=shared"
+        print(self.database)
         self.predict_horizon = predict_horizon
         self.transform = transform
 
     def __len__(self):
         try:
-            conn = sqlite3.connect(self.database)
+            conn = sqlite3.connect(self.database, uri=True)
             cursor = conn.cursor()
             cursor.execute("SELECT MAX(ROWID) from data")
             n = cursor.fetchone()[0]
@@ -71,7 +72,7 @@ class NewsEntityDataset(Dataset):
         idx = idx + 1
 
         try:
-            conn = sqlite3.connect(self.database)
+            conn = sqlite3.connect(self.database, uri=True)
             cursor = conn.cursor()
             cursor.execute(f"""SELECT * FROM data WHERE data.ROWID == {idx}""")
             sample = cursor.fetchone()
