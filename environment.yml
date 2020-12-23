@@ -14,4 +14,8 @@ dependencies:
   - numpy
   - tqdm
   - pymongo
+  - matplotlib
+  - cudatoolkit=10.2
+  - torchvision
+  - pytorch
 prefix: /home/jp/miniconda3/envs/temp_graph

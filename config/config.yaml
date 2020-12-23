@@ -1,21 +1,20 @@
 ---
-seed: 3
+seed: 3 # random seed
 c_stages:
     get_data: False
-    test: False
     train: True
 c_data:
-    cluster: False
+    cluster: False # indicates if preprocessing is executed on the cluster
     prefix: data/
-    start_date: "2018_01_01"
-    end_date: "2019_01_01"
+    start_date: "2018_01_01" # GDELT data to pull from this date on
+    end_date: "2019_01_01" # GDELT data until this date
     num_entities_per_article: 4
     database: "temp_graph.db"
-    salience_threshold: 0.02
+    salience_threshold: 0.02 # cutoff value for a valid entity
     limit:
 c_model:
     prefix: models
-    predict_horizon: 200
+    predict_horizon: 200 # how many days to predict in the future
 c_tgn:
     batch_size: 100
     n_degree: 10

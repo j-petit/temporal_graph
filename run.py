@@ -104,8 +104,6 @@ def run(hook, _config, c_stages, c_results, _run):
 
     if c_stages["get_data"]:
         get_dataset(_config)
-    if c_stages["test"]:
-        print("test")
     if c_stages["train"]:
         run_training(_config)
 
