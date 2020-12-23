@@ -4,7 +4,7 @@ Graph embeddings for temporal clustering
 
 ## Research Idea
 
-Take a look at the presentation in `reports/temp_graph_praesi/slides.pdf`.
+Take a look at [the presentation](reports/temp_graph_praesi/slides.pdf).
 
 Short summary: Predict the activity of an entity in a temporal graph stream using dynamic embeddings computed by the [TGN architecture](https://github.com/twitter-research/tgn). TGN is adapted to use an RNN as a decoder which outputs the `# Occurances` of each entity in the datastream. The graph stream dataset is extracted from the [GDELT Global Entity Graph](https://blog.gdeltproject.org/announcing-the-global-entity-graph-geg-and-a-new-11-billion-entity-dataset/).
 
