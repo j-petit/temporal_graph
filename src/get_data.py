@@ -139,14 +139,18 @@ def generate_graph_data(db_name, processed_file, num_entities_per_article, salie
             (int(article_date.timestamp()), *article_pair) for article_pair in article_pairs
         ]
         pairs.extend(article_pairs)
-        entity_ids = entity_ids.append(pd.DataFrame(list(zip(entities, entity_names, entity_type)), columns=["mid", "name", "type"]))
+        entity_ids = entity_ids.append(
+            pd.DataFrame(
+                list(zip(entities, entity_names, entity_type)), columns=["mid", "name", "type"]
+            )
+        )
 
     df = pd.DataFrame(pairs, columns=["unix_time", "entity_1", "entity_2"])
 
     try:
         conn = sqlite3.connect(db_name)
-        df.to_sql("data", conn, index=False, if_exists="append", method='multi')
-        entity_ids.to_sql("entities", conn, index=False, if_exists="append", method='multi')
+        df.to_sql("data", conn, index=False, if_exists="append", method="multi")
+        entity_ids.to_sql("entities", conn, index=False, if_exists="append", method="multi")
         conn.commit()
     except sqlite3.Error as e:
         print(e)
@@ -159,7 +163,8 @@ def create_entity_counts(db_name):
     try:
         conn = sqlite3.connect(db_name)
         cursor = conn.cursor()
-        cursor.execute("""
+        cursor.execute(
+            """
             CREATE TABLE entity_counts AS
             SELECT entity_1, my_date, COUNT(*) as occCount FROM
             (

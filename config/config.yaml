@@ -16,6 +16,33 @@ c_data:
 c_model:
     prefix: models
     predict_horizon: 200
+c_tgn:
+    batch_size: 100
+    n_degree: 10
+    n_head: 2
+    n_epoch: 10
+    n_layer: 1
+    lr: 3e-4
+    patience: 5
+    drop_out: 0.1
+    node_dim: 100
+    time_dim: 100
+    backprop_every: 1
+    use_memory:  True
+    embedding_module: graph_attention
+    message_function: identity
+    aggregator: last
+    memory_update_at_end: True
+    message_dim: 100
+    memory_dim: 100
+    different_new_nodes: True
+    uniform: True
+    randomize_features: True
+    use_destination_embedding_in_message: True
+    use_source_embedding_in_message: True
+    n_neg: 1
+    use_validation: True
+    new_node: True
 c_results:
     prefix: experiments
 c_analyze:

@@ -1,7 +1,7 @@
 ---
 title: Activity Prediction using Dynamic Graph Embeddings
 author: Jens Petit
-date: 2020-10-29
+date: 2020-12-16
 theme: ScaDS
 colortheme: dolphin
 fontfamily: noto-sans
@@ -11,53 +11,112 @@ aspectratio: 43
 slide-level: 2
 header-includes:
   - \usepackage{caption}
-  - \captionsetup[figure]{labelformat=empty}
   - \usepackage{cmbright}
+  - \usepackage{amsmath}
 ---
 
 ## Outline
 
 \tableofcontents
 
-# Dynamic Graph Representation Learning
+# Graph Representation Learning
+
+## Short Primer On Graph RL
+
+> Project nodes into a latent vector space where geometric relations correspond to relationships in the original graph.
+
+![The node embedding problem[^10].](images/graph_rl_schema.png){width=65%}
+
+[^10]: Graph Representation Learning, _Hamilton 2020_.
+
+## An Encoder-Decoder Perspective
+
+![Overview of the encoder-decoder perspective[^11].](images/encoder_decoder_schema.png){width=65%}
+
+\pause
+$$
+\textrm{DEC}\left(\textrm{ENC}(u), \textrm{ENC}(v)\right) = \textrm{DEC}\left(\mathbf{z}_u, \mathbf{z}_v\right) \approx \mathbf{S}[u,v]
+$$
+
+\pause
+
+$$
+\mathcal{L} = \sum_{(u,v) \in \mathcal{D}} \ell \left(\textrm{DEC}(\mathbf{z}_u, \mathbf{z}_v), \mathbf{S}[u,v]\right)
+$$
+
+[^11]: Graph Representation Learning, _Hamilton 2020_.
 
 
-## Dynamic Graph Representation Learning
+## Dynamic Graph Representation Learning {.t}
 
-### Discrete-time dynamic graphs (DTDG)
+\vspace{1cm}
 
-Sequences of static graph snapshots.
+::: columns
 
-### Continuous-time dynamic graphs (CTDG)
+:::: column
+
+*Discrete-Time Dynamic Graphs*
+\linebreak
+
+![Two graph snapshots.](images/DTDG.png){width=80%}
+
+::::
+
+:::: column
+
+*Continuous-Time Dynamic Graphs*
+\linebreak
 
 Timed list of events, including node addition, deletion and edge addition and deletion.
+\linebreak
+```
+{
+    AddNode(v_4, t_1),
+    AddEdge((v_2, v_4), t_2),
+    AddEdge((v_2, v_3), t_3),
+    ...
+}
 
-## Temporal Graph Networks (TGN)
+```
 
-![The city of Leipzig as a graph](tgn_general.pdf){width=65%}
+::::
 
-Current decoders:
+:::
 
-- future edge (‘link’) prediction
-- dynamic node classification
 
-Problem settings:
+## Example: Temporal Graph Networks[^1]
 
-- Transductive: only nodes which have been used in training
-- Inductive: additionally nodes which have *not* been used in training
+![TGN architecture.](tgn_general.pdf){width=65%}
 
-## Example: TGN for future link prediction[^1]
-
-Datasets:
-
-- Reddit, Wikipedia: Bipartite interaction graphs with users and subreddits/pages as nodes.
-- Twitter: Users are nodes and retweets are interactions.
-
-All interaction events carry text features (tweets, edits, posts) and 70%-15%-15% (train-valid-test) chronological split is used.
-
-Exemplary decoder: simple MLP decoder mapping from the concatenation of two node embeddings to the probability of the edge
 
 [^1]: "Temporal Graph Networks For Deep Learning on Dynamic Graphs, _Rossi et al._"
+
+## Example: TGN for future link prediction
+
+::: columns
+
+:::: column
+
+`{`{=latex}\centering ![](images/tng_wiki.pdf){width=80%} \par`}`{=latex}
+
+::::
+
+:::: column
+
+Dataset:
+
+- Wikipedia with bipartite interaction graphs (users and pages as nodes)
+- interaction events carry text features (edits) and chronological split
+
+\vspace{1cm}
+
+Decoder:
+
+- predict future edits -> concatenate two node embeddings into simple MLP
+
+::::
+
+:::
 
 ## Example: TGN encoder
 
@@ -70,62 +129,16 @@ Core idea: combining memory module with graph-based operators
 [^2]: Figure taken from "Temporal Graph Networks For Deep Learning on Dynamic Graphs, _Rossi et al._"
 
 
-## Message computation
-
-![TGN computations on a single batch of time-stamped interactions.](tgn_computations.png){width=65%}
-
-$$
-\mathbf{m}_i(t) = \mathrm{msg}\left(\mathbf{s}_i(t^-), \mathbf{s}_j(t^-), \Delta t, \mathbf{e}_{ij}(t)\right)
-$$
-
-## Message aggregator
-
-![&nbsp;](tgn_computations.png){width=65%}
-
-Combine all messages in a single batch for a specific node:
-$$
-\bar{\mathbf{m}}_i(t) = \mathrm{agg}\left(\mathbf{m}_i(t_1), \hdots, \mathbf{m}_i(t_b)\right)
-$$
-
-## Memory update
-
-![TGN computations on a single batch of time-stamped interactions.](tgn_computations.png){width=65%}
-
-Using a Recurrent Neural Network:
-$$
-\mathbf{s}_i(t) = \mathrm{mem}\left(\bar{\mathbf{m}}_i(t), \mathbf{s}_i(t^-)\right)
-$$
-
-## Embedding computation
-
-![&nbsp;](tgn_computations.png){width=65%}
-
-$$
-\mathbf{z}_i(t) = \mathrm{emb}(i, t) = \sum_{j \in \mathcal{N}^k_i([0, t]) } h\left(\mathbf{s}_i(t), \mathbf{s}_j(t), \mathbf{e}_{ij}, \mathbf{v}_i(t), \mathbf{v}_j(t)\right), \nonumber
-$$
-
-Includes specific cases like: memory directly, time projection (JODIE), Temporal Graph Attention (TGAT), Temporal Graph Sum
-
-## TGN training
-
-![TGN training [^2]](tgn_train.png){width=65%}
-
-Problem: memory-related modules (Message function, Message aggregator, and Memory updater) do not directly influence the loss and therefore do not receive a gradient -> memory update before predictions
-
-[^2]: Figure taken from "Temporal Graph Networks For Deep Learning on Dynamic Graphs, _Rossi et al._"
-
-
 # GDELT Dataset
 
-## The GDELT Dataset
+## The GDELT Project...
 
-> "The GDELT Project monitors the world's broadcast, print, and web news from nearly every corner of every country in over 100 languages and identifies the people, locations, organizations, themes, sources, emotions, counts, quotes, images and events driving our global society every second of every day, creating a free open platform for computing on the entire world."
+> "... monitors the world's broadcast, print, and web news."
 
-- Global Knowledge Graph
-- Global Event Database
-- Global Entity Graph
-- Global Frontpage Graph
+![Person co-occurrence in articles covering Syria and Turkey.[^18]](images/gdelt_example.png){width=50%}
 
+
+[^18]: \url{https://medium.com/@atakanguney94/a-brief-introduction-into-gdelt-gtc64d03a}
 
 ## The Global Entity Graph
 
@@ -171,7 +184,7 @@ Leipzig	            Germany
 ...
 ```
 
-Restricting to the 4 most salient entities gives roughly 200k edges per day
+Restricting to the 4 most salient entities gives roughly 200k edges per day.
 
 
 ## Data Example: IPCC
@@ -202,55 +215,97 @@ ottish Government       IPCC     12
 
 :::
 
-# Research Idea
+# Research Idea: Activity Prediction
 
 ## Motivation
 
 ### How can we identify entities with similar temporal dynamics, e.g. "hot" topics?
 
-## Approach
-
-![](motiviaton_arch.png)
-
-Replace decoder with a RNN which predicts the future #Occurrences per day for a given entity and time horizon
-
-## Approach
+## The Embedding Space
 
 ::: columns
 
 :::: column
 
-*Why is the graph information relevant?*
+Standard setting: \linebreak
 
-------------------------------------
-
-The neighborhood should be strong indicator for future behavior: If all my neighbors are getting popular, then it is very likely that I will too.
-
-Example: If a footballer is mentioned during an event like a world cup, it should be much more active.
+![Closeness in embedding space predicts neighborhood.](images/graph_rl_schema.png){width=100%}
 
 ::::
 
 :::: column
 
-![](graph_temp.pdf)
+Proposed approach: \linebreak
+
+![Closeness in embedding space predicts temporal activity.](images/graph_rl_schema_approach.pdf){width=100%}
 
 ::::
 
 :::
 
-## The Embedding Space
 
-- before (link prediction): similarity predicts future link between two entities
-- now (activity prediction): embedding space represents temporal dynamics
-    - clustering
-    - split relative and absolute dynamics
-    - duplicate detection
 
-## Details
+## Deep Learning Architecture
 
-- Current state:
-    - preparing dataset 
-- Baseline: time series prediction for number of occurrences (no neighborhood info)
-- Open questions:
-    - What is a single data point?
-    - How to batch the data?
+![](motiviaton_arch.png)
+
+Replace decoder with a RNN which predicts the future #Occurrences per day for a given entity and time horizon
+
+## Why is the graph information relevant?
+
+::: columns
+
+:::: column
+
+![](images/modric_network.pdf)
+
+::::
+
+:::: column
+
+![](images/mordic_fifa.png)
+
+::::
+
+:::
+
+### The neighborhood should be strong indicator for future behavior.
+
+
+## Current Status
+
+Dataset preparation:
+
+- implemented data fetching, processing and interim representation
+- large dataset -> setup streaming scenario
+
+\pause
+
+Running baseline experiments:
+
+- time series prediction for number of occurrences (no neighborhood info)
+
+## Open Questions and Challenges
+
+Limitations:
+
+- cannot predict one time events
+
+\pause
+
+Open questions:
+
+- Can we split relative and absolute dynamics?
+- What should be the prediction horizon?
+
+
+## Conclusion
+
+`{`{=latex}\centering ![](images/graph_rl_schema_approach.pdf){width=65%} \par`}`{=latex}
+
+\vspace{1cm}
+
+\pause
+
+### Thank you! Questions?
+

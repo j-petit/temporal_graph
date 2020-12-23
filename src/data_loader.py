@@ -2,6 +2,7 @@ import sqlite3
 import datetime
 from torch.utils.data import Dataset
 
+
 def occurances_entity(start_date, entity, database, predict_horizon):
 
     date_format = "%Y-%m-%d"
@@ -15,7 +16,8 @@ def occurances_entity(start_date, entity, database, predict_horizon):
         conn = sqlite3.connect(database, uri=True)
         cursor = conn.cursor()
 
-        cursor.execute(f"""
+        cursor.execute(
+            f"""
             SELECT
                 IFNULL(ec1.occCount, 0) as occCount
             FROM dates

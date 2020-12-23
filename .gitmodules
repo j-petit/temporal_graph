@@ -1,0 +1,3 @@
+[submodule "src/tgn"]
+	path = src/tgn
+	url = git@github.com:twitter-research/tgn.git
