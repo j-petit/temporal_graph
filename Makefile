@@ -30,7 +30,7 @@ clean_data:
 
 ## Lint using flake8
 format:
-	black .
+	black --exclude tgn .
 
 ## Test python environment is setup correctly
 test_environment:
